@@ -1,6 +1,11 @@
 name: Build Web
 on:
   push:
+    paths-ignore:
+      - 'dist/**'
+concurrency:
+  group: build-web-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
