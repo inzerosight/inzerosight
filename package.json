@@ -16,6 +16,7 @@
     "generic-speck": "1.1.1"
   },
   "devDependencies": {
+    "typescript": "^5.8.2",
     "vite": "^6.3.5",
     "vite-plugin-web-extension": "^4.5.0"
   }
