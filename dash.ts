@@ -1,6 +1,6 @@
 import zwus from 'zwus';
-import * as speck48_96ctr from './speck48_96ctr.js';
-import * as speck32_64ecb from './speck32_64ecb.js';
+import * as speck48_96ctr from './speck48_96ctr.ts';
+import * as speck32_64ecb from './speck32_64ecb.ts';
 
 type Cipher = 'PLAIN' | 'SPECK48_96CTR' | 'SPECK32_64ECB (insecure)';
 type Op = 'NO' | 'YES';
