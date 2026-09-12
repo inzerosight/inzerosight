@@ -7,6 +7,9 @@ const encoderDropdown = document.getElementById('encoder');
 const cipherDropdown = document.getElementById('cipher');
 document.getElementById('encodeButton').addEventListener('click', ACT);
 document.getElementById('decodeButton').addEventListener('click', ACT);
+document.getElementById('sign').addEventListener('click', e =>
+    e.target.classList.toggle('on')
+);
 
 function ACT(event) {
     if (textarea.value === '') {
