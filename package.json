@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "TARGET=firefox vite",
-    "build:web": "TARGET=web vite build",
-    "build:firefox": "TARGET=firefox vite build",
-    "build:chrome": "TARGET=chrome vite build",
+    "dev": "vite --mode chrome",
+    "build:web": "vite build --mode web",
+    "build:firefox": "vite build --mode firefox",
+    "build:chrome": "vite build --mode chrome",
     "build": "bun run build:firefox && bun run build:chrome"
   },
   "dependencies": {

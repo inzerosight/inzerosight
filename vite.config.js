@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite';
 import fs from 'node:fs';
 
-const target = process.env.TARGET || 'firefox';
-
-export default defineConfig(async () => {
+export default defineConfig(async ({ mode }) => {
+    const target = process.env.TARGET || (['chrome', 'firefox', 'web'].includes(mode) ? mode : 'chrome');
     const plugins = [];
 
     if (target !== 'web') {
