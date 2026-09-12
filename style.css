@@ -42,12 +42,29 @@ body {
 }
 
 #overbar {
+    position: relative;
     padding: 1.5%;
     font-size: 10px;
     font-weight: bold;
     margin-bottom: 0px;
     color: rgb(229, 244, 255, 0.6);
     border-bottom: 1px solid rgb(0, 126, 199, .5);
+}
+
+#sigDetect {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: normal;
+    color: rgb(229, 244, 255, 0.85);
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#sigDetect.show {
+    opacity: 1;
+    transition: opacity .2s;
 }
 
 #homepage {
