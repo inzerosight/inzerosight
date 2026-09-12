@@ -97,7 +97,40 @@ select {
     background-color: #e6e6e6;
     text-align: center;
     font-size: 11px;
-    width: 8.5em;
+    width: 8.0em;
+    vertical-align: middle;
+}
+
+#encodeButton, #decodeButton {
+    vertical-align: middle;
+}
+
+#sign {
+    margin-left: 1.5%;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 99px;
+    border: 1px solid rgba(229, 244, 255, 0.2);
+    background: transparent;
+    color: rgba(229, 244, 255, 0.35);
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+#sign:hover {
+    border-color: rgba(229, 244, 255, 0.35);
+    color: rgba(229, 244, 255, 0.5);
+}
+
+#sign.on {
+    background: #e6e6e6;
+    border-color: #e6e6e6;
+    color: #002b4d;
+}
+
+#sign.on:hover {
+    background: #fff;
+    border-color: #fff;
 }
 
 #notice {
