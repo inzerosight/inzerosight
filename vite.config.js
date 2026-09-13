@@ -19,6 +19,12 @@ export default defineConfig(async ({ mode }) => {
                         icons: { "48": "icon_500.png" },
                     };
 
+                    const content_scripts = [{
+                        matches: ["<all_urls>"],
+                        js: ["content.js"],
+                        run_at: "document_idle"
+                    }];
+
                     if (target === 'chrome') {
                         return {
                             ...base,
@@ -28,6 +34,7 @@ export default defineConfig(async ({ mode }) => {
                                 default_title: "in\u00D8sight",
                                 default_popup: "index.html",
                             },
+                            content_scripts,
                         };
                     }
 
@@ -46,6 +53,7 @@ export default defineConfig(async ({ mode }) => {
                                 id: "{0a73f41c-c59c-404b-9e07-f7392fa830d4}",
                             },
                         },
+                        content_scripts,
                     };
                 },
             })

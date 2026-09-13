@@ -1,18 +1,13 @@
 import zwus from 'zwus';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
+import { makeSig, parseSig } from './sig.js';
 
 const textarea = document.getElementById('textarea');
 const encoderDropdown = document.getElementById('encoder');
 const cipherDropdown = document.getElementById('cipher');
 const signBtn = document.getElementById('sign');
 const sigDetect = document.getElementById('sigDetect');
-
-const SIG = {
-    3: '\u{200D}\u{200B}\u{00AD}\u{180E}',
-    6: '\u{200D}\u{200B}\u{00AD}\u{2060}',
-    8: '\u{200D}\u{200B}\u{00AD}\u{FEFF}'
-};
 
 document.getElementById('encodeButton').addEventListener('click', ACT);
 document.getElementById('decodeButton').addEventListener('click', ACT);
@@ -32,23 +27,28 @@ function ACT(event) {
     }
 
     const op = event.target.id === 'encodeButton' ? 'NO' : 'YES';
-    const cipher = getCipherKey();
+    let cipher = getCipherKey();
     let base = encoderDropdown.value.split('-')[1];
     let text = textarea.value;
 
     if (op === 'YES') {
-        const sigBase = Object.keys(SIG).find(b => text.includes(SIG[b]));
-        if (sigBase) {
-            if (sigBase !== base) {
-                sigDetect.textContent = `ZWUS-${sigBase} signature detected`;
+        const parsed = parseSig(text);
+        if (parsed) {
+            if (parsed.base !== base || (parsed.cipher && parsed.cipher !== cipher)) {
+                const desc = parsed.cipher && parsed.cipher !== 'PLAIN' ? ` (${parsed.cipher})` : '';
+                sigDetect.textContent = `ZWUS-${parsed.base}${desc} signature detected`;
                 sigDetect.className = 'show';
                 fadeTimer = setTimeout(() =>
                     sigDetect.className = '', 2000
                 );
             }
-            base = sigBase;
+            base = parsed.base;
             encoderDropdown.value = 'ZWUS-' + base;
-            text = text.replace(SIG[base], '');
+            if (parsed.cipher) {
+                cipher = parsed.cipher;
+                cipherDropdown.value = cipher;
+            }
+            text = text.slice(0, parsed.sigIdx) + parsed.payload;
         }
     }
 
@@ -60,7 +60,7 @@ function ACT(event) {
     try {
         let val = DESCRY[op][cipher](text, base, kStr);
         if (op === 'NO' && signBtn.classList.contains('on'))
-            val = SIG[base] + val;
+            val = makeSig(base, cipher) + val;
         textarea.value = val;
     } catch (e) {
         console.log(e);
