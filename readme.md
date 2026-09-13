@@ -9,10 +9,6 @@
 ---
 
 <p align="center">
-  <img src="docs/onscreen.png" alt="inØsight on-screen detection">
-</p>
-
-<p align="center">
   <img src="docs/ui.png" alt="inØsight user interface">
 </p>
 
