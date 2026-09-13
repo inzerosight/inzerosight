@@ -14,7 +14,7 @@ export default defineConfig(async ({ mode }) => {
                         name: "in\u00D8sight",
                         version: "3.0.0",
                         author: "planetrenox@pm.me",
-                        homepage_url: "https://github.com/planetrenox/inzerosight",
+                        homepage_url: "https://github.com/inzerosight/inzerosight",
                         description: "Communicate undetected in plain sight.",
                         icons: { "48": "icon_500.png" },
                     };
