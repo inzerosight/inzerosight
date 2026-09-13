@@ -9,12 +9,15 @@
 ---
 
 <p align="center">
-  <img src="docs/ui.png" alt="inØsight user interface">
+  <img src="docs/inzerosight.gif" alt="inØsight demo">
 </p>
 
 <p align="center">
-  <img src="docs/inzerosight.gif" alt="inØsight demo">
+  <img src="docs/ui.png" alt="inØsight user interface">
 </p>
+
+### Sign
+When enabled, prepends an invisible zero-width signature to the output. This allows inØsight to automatically detect hidden messages across web pages, identify the base and cipher, and show the on-screen decode button.
 
 ## How ZWUS Works
 
