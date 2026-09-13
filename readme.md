@@ -21,6 +21,8 @@ When enabled, prepends an invisible zero-width signature to the output. This all
 
 ## How ZWUS Works
 
+Because ZWUS operates directly on numerical code points (`U+0000` to `U+10FFFF`), encoding works with **all Unicode characters in existence**—including every language script, emoji, and symbol.
+
 1. Take each character's Unicode code point.
 2. Convert it to the chosen base (3, 6, or 8).
 3. Map each resulting digit to its assigned zero-width character from the alphabet.
