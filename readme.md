@@ -28,6 +28,8 @@ When enabled, prepends an invisible zero-width signature to the output. This all
 
 The result is a string of invisible Unicode that carries the full original text. Decoding reverses the mapping: split on the separator, look up each zero-width character to recover the digit, parse the base-N number back to a code point, and reconstruct the string.
 
+For details regarding picking the optimal standard/base, see [docs/zwus.md](docs/zwus.md).
+
 For cipher details, see [docs/cipher.md](docs/cipher.md).
 
 ## Use ZWUS in Your Own Projects
