@@ -12,6 +12,10 @@
   <img src="docs/ui.png" alt="inØsight user interface">
 </p>
 
+<p align="center">
+  <img src="docs/inzerosight.gif" alt="inØsight demo">
+</p>
+
 ## How ZWUS Works
 
 1. Take each character's Unicode code point.
