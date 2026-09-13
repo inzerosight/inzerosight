@@ -8,3 +8,6 @@ Block cipher in ECB mode. Each character is encrypted independently — identica
 
 ### SPECK48/96 CTR
 Stream cipher mode with a random 24-bit nonce prepended to the output. Identical plaintexts produce different ciphertexts each time. Significantly more secure than ECB. **Rotate your password after roughly every 100 encryptions** to avoid nonce reuse risk within the 24-bit space.
+
+---
+Cipher test. Decrypt this sentence with the password 123.
