@@ -14,13 +14,14 @@ function initShadow() {
     const s = document.createElement('style');
     s.textContent = `
         .in0-wrap {
-            position: absolute;
+            position: fixed;
             pointer-events: auto;
             z-index: 2147483647;
             display: flex;
             flex-direction: column;
             align-items: center;
             font-family: system-ui, -apple-system, sans-serif;
+            transition: opacity 0.1s ease;
         }
         .in0-btn {
             background: #18191c;
@@ -69,6 +70,7 @@ function initShadow() {
 }
 
 function createOverlay(node, parsed, start, end) {
+    for (const e of active) if (e.node === node && e.start === start) return;
     initShadow();
     const wrap = document.createElement('div');
     wrap.className = 'in0-wrap';
@@ -103,6 +105,12 @@ function updatePos(entry) {
         active.delete(entry);
         return;
     }
+    const p = node.parentElement;
+    if (!p || (p.checkVisibility && !p.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))) {
+        wrap.style.display = 'none';
+        return;
+    }
+
     const r = document.createRange();
     try {
         r.setStart(node, start);
@@ -113,11 +121,35 @@ function updatePos(entry) {
         return;
     }
     let rect = r.getBoundingClientRect();
-    if (!rect.width && !rect.height && node.parentElement) {
-        rect = node.parentElement.getBoundingClientRect();
+    if (!rect.width && !rect.height) rect = p.getBoundingClientRect();
+    if (!rect.width && !rect.height) {
+        wrap.style.display = 'none';
+        return;
     }
-    const x = rect.left + window.scrollX + (rect.width || 0) / 2;
-    const y = rect.top + window.scrollY;
+
+    // Check viewport bounds
+    if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
+        wrap.style.display = 'none';
+        return;
+    }
+
+    // Check ancestor scroll/overflow clipping
+    let cur = p;
+    while (cur && cur !== document.body && cur !== document.documentElement) {
+        const s = window.getComputedStyle(cur);
+        if (s.overflow !== 'visible' || s.overflowX !== 'visible' || s.overflowY !== 'visible') {
+            const cr = cur.getBoundingClientRect();
+            if (rect.bottom < cr.top || rect.top > cr.bottom || rect.right < cr.left || rect.left > cr.right) {
+                wrap.style.display = 'none';
+                return;
+            }
+        }
+        cur = cur.parentElement;
+    }
+
+    wrap.style.display = 'flex';
+    const x = rect.left + (rect.width || 0) / 2;
+    const y = rect.top;
     wrap.style.left = `${x - wrap.offsetWidth / 2}px`;
     wrap.style.top = `${y - wrap.offsetHeight - 2}px`;
 }
@@ -167,14 +199,11 @@ function onAction(entry, parsed) {
     }
 }
 
-const scanned = new WeakSet();
-
 function scanNode(node) {
-    if (!node || node.nodeType !== Node.TEXT_NODE || scanned.has(node)) return;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
     const val = node.nodeValue;
     if (!val || !val.includes(SIG_PREFIX)) return;
 
-    scanned.add(node);
     let idx = 0;
     while (idx < val.length) {
         const sub = val.slice(idx);
@@ -199,7 +228,22 @@ function scanTree(root) {
 
 scanTree(document.body);
 
+let rafId;
+function scheduleUpdate() {
+    if (rafId || active.size === 0) return;
+    rafId = requestAnimationFrame(() => {
+        rafId = null;
+        active.forEach(updatePos);
+    });
+}
+
 const obs = new MutationObserver(muts => {
+    for (const e of [...active]) {
+        if (!e.node.isConnected || !e.node.nodeValue?.includes(SIG_PREFIX)) {
+            e.wrap.remove();
+            active.delete(e);
+        }
+    }
     for (const m of muts) {
         if (m.type === 'characterData') scanNode(m.target);
         else for (const an of m.addedNodes) {
@@ -207,9 +251,10 @@ const obs = new MutationObserver(muts => {
             else if (an.nodeType === Node.ELEMENT_NODE && an.id !== 'in0-host') scanTree(an);
         }
     }
+    scheduleUpdate();
 });
 
 obs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
 
-window.addEventListener('scroll', () => active.forEach(updatePos), { passive: true });
-window.addEventListener('resize', () => active.forEach(updatePos), { passive: true });
+window.addEventListener('scroll', scheduleUpdate, { capture: true, passive: true });
+window.addEventListener('resize', scheduleUpdate, { passive: true });
