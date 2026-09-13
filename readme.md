@@ -8,20 +8,6 @@
 
 ---
 
-## ZWUS Encoding
-
-Text is encoded using **ZWUS (Zero Width Unicode Standard)** — each character's code point is converted to a target base, then each digit is mapped to a designated zero-width Unicode character.
-
-| Base | Characters Used | Unicode Points | Notes |
-|------|:-:|---|---|
-| **ZWUS-3** | 3 + 1 separator | U+180E · U+200B · U+200D · sep U+00AD | Most compatible — fewest characters, safest across platforms |
-| **ZWUS-6** | 6 + 1 separator | U+200D · U+200F · U+00AD · U+2060 · U+200B · U+200E · sep U+200C | Balanced |
-| **ZWUS-8** | 8 + 1 separator | U+200D · U+200F · U+00AD · U+2060 · U+200B · U+200E · U+180E · U+FEFF · sep U+200C | Smallest output but uses characters some platforms strip |
-
-**Compatibility:** ZWUS-3 > ZWUS-6 > ZWUS-8    
-**Output size:** ZWUS-8 < ZWUS-6 < ZWUS-3
-
-Some platforms actively strip or collapse certain zero-width characters. If your encoded text breaks on a platform, drop to a lower base.
 
 ## Encryption
 
