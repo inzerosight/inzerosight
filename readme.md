@@ -8,17 +8,13 @@
 
 ---
 
+<p align="center">
+  <img src="docs/onscreen.png" alt="inØsight on-screen detection">
+</p>
 
-## Encryption
-
-### PLAIN
-No encryption. Encodes text directly.
-
-### SPECK32/64 ECB
-Block cipher in ECB mode. Each character is encrypted independently — identical plaintext characters produce identical ciphertext. Useful when you want varied-looking output from the same input, but **not secure under real threat models** since patterns in the plaintext leak through.
-
-### SPECK48/96 CTR
-Stream cipher mode with a random 24-bit nonce prepended to the output. Identical plaintexts produce different ciphertexts each time. Significantly more secure than ECB. **Rotate your password after roughly every 100 encryptions** to avoid nonce reuse risk within the 24-bit space.
+<p align="center">
+  <img src="docs/ui.png" alt="inØsight user interface">
+</p>
 
 ## How ZWUS Works
 
@@ -28,6 +24,8 @@ Stream cipher mode with a random 24-bit nonce prepended to the output. Identical
 4. Join digits together; separate characters with the base's designated separator (also zero-width).
 
 The result is a string of invisible Unicode that carries the full original text. Decoding reverses the mapping: split on the separator, look up each zero-width character to recover the digit, parse the base-N number back to a code point, and reconstruct the string.
+
+For cipher details, see [docs/cipher.md](docs/cipher.md).
 
 ## Use ZWUS in Your Own Projects
 
