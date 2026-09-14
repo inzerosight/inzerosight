@@ -69,7 +69,7 @@ function initShadow() {
     (document.body || document.documentElement).appendChild(host);
 }
 
-function createOverlay(node, parsed, start, end) {
+function createOverlay(node, parsed, start, endNode, end) {
     for (const e of active) if (e.node === node && e.start === start) return;
     initShadow();
     const wrap = document.createElement('div');
@@ -91,7 +91,7 @@ function createOverlay(node, parsed, start, end) {
     wrap.appendChild(arrow);
     shadow.appendChild(wrap);
 
-    const entry = { wrap, node, start, end };
+    const entry = { wrap, node, start, endNode, end };
     active.add(entry);
 
     btn.onclick = () => onAction(entry, parsed);
@@ -99,8 +99,8 @@ function createOverlay(node, parsed, start, end) {
 }
 
 function updatePos(entry) {
-    const { wrap, node, start, end } = entry;
-    if (!node.isConnected) {
+    const { wrap, node, start, endNode, end } = entry;
+    if (!node.isConnected || !endNode.isConnected) {
         wrap.remove();
         active.delete(entry);
         return;
@@ -114,7 +114,7 @@ function updatePos(entry) {
     const r = document.createRange();
     try {
         r.setStart(node, start);
-        r.setEnd(node, Math.min(end, node.nodeValue.length));
+        r.setEnd(endNode, Math.min(end, endNode.nodeValue.length));
     } catch {
         wrap.remove();
         active.delete(entry);
@@ -155,8 +155,11 @@ function updatePos(entry) {
 }
 
 function onAction(entry, parsed) {
-    const { wrap, node, start, end } = entry;
-    const rawPayload = node.nodeValue.slice(start + parsed.sigLen, end);
+    const { wrap, node, start, endNode, end } = entry;
+    const r = document.createRange();
+    r.setStart(node, start);
+    r.setEnd(endNode, end);
+    const rawPayload = r.toString().slice(parsed.sigLen);
     let decoded = '';
 
     if (parsed.cipher === 'PLAIN') {
@@ -184,9 +187,6 @@ function onAction(entry, parsed) {
     }
 
     if (decoded) {
-        const r = document.createRange();
-        r.setStart(node, start);
-        r.setEnd(node, end);
         r.deleteContents();
         const span = document.createElement('span');
         span.className = 'inzerosight-decoded';
@@ -197,6 +197,27 @@ function onAction(entry, parsed) {
         wrap.remove();
         active.delete(entry);
     }
+}
+
+function getPayloadRange(node, base, start) {
+    let endNode = node;
+    let end = getPayloadEnd(node.nodeValue, base, start);
+
+    // Gmail inserts <wbr> elements into long zero-width runs, splitting one payload across text nodes.
+    while (end === endNode.nodeValue.length) {
+        let next = endNode.nextSibling;
+        let hasWbr = false;
+        while (next?.nodeType === Node.ELEMENT_NODE && next.tagName === 'WBR') {
+            hasWbr = true;
+            next = next.nextSibling;
+        }
+        if (!hasWbr || next?.nodeType !== Node.TEXT_NODE) break;
+        const nextEnd = getPayloadEnd(next.nodeValue, base, 0);
+        if (!nextEnd) break;
+        endNode = next;
+        end = nextEnd;
+    }
+    return { endNode, end };
 }
 
 function scanNode(node) {
@@ -210,9 +231,9 @@ function scanNode(node) {
         const p = parseSig(sub);
         if (!p) break;
         const start = idx + p.sigIdx;
-        const end = getPayloadEnd(val, p.base, start + p.sigLen);
-        createOverlay(node, p, start, end);
-        idx = end + 1;
+        const { endNode, end } = getPayloadRange(node, p.base, start + p.sigLen);
+        createOverlay(node, p, start, endNode, end);
+        idx = endNode === node ? end + 1 : val.length;
     }
 }
 
@@ -239,7 +260,7 @@ function scheduleUpdate() {
 
 const obs = new MutationObserver(muts => {
     for (const e of [...active]) {
-        if (!e.node.isConnected || !e.node.nodeValue?.includes(SIG_PREFIX)) {
+        if (!e.node.isConnected || !e.node.nodeValue?.startsWith(SIG_PREFIX, e.start)) {
             e.wrap.remove();
             active.delete(e);
         }
