@@ -26,7 +26,7 @@ When enabled, prepends an invisible zero-width signature to the output. This all
 3. Maps each resulting digit to its assigned zero-width character from the alphabet.
 4. Joins digits together; separates characters with the base's designated separator (also zero-width).
 
-The result is a string of invisible Unicode that carries the full original text. Decoding reverses the mapping: split on the separator, look up each zero-width character to recover the digit, parse the base-N number back to a code point, and reconstruct the string.
+The result is a string of invisible Unicode that carries the full original text. Decoding reverses the mapping: splits on the separator, looks up each zero-width character to recover the digit, parses the base-N number back to a code point, and reconstructs the string.
 
 For details regarding picking the optimal standard/base, see [docs/zwus.md](docs/zwus.md).
 
