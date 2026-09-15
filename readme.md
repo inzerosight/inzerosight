@@ -41,5 +41,3 @@ The encoder/decoder is available as a standalone package for multiple languages:
 
 > [!NOTE]
 > Encoding works with **all Unicode characters in existence** (`U+0000` to `U+10FFFF`), including every language script, emoji, and symbol.
-
-https://raw.githubusercontent.com/inzerosight/inzerosight/main/docs/inzerosight-youtube-demo.mp4
