@@ -8,16 +8,8 @@
 
 ---
 
-## Demo
-
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=06yX9rLJBgs">
-    <img src="docs/inzerosight-girl.png" alt="Watch the inØsight demo on YouTube" width="900">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=06yX9rLJBgs"><strong>▶ Watch the full demo on YouTube</strong></a> · <a href="docs/inzerosight-youtube-demo.mp4">MP4</a>
+  <img src="docs/inzerosight.gif" alt="inØsight demo">
 </p>
 
 <p align="center">
@@ -49,3 +41,5 @@ The encoder/decoder is available as a standalone package for multiple languages:
 
 > [!NOTE]
 > Encoding works with **all Unicode characters in existence** (`U+0000` to `U+10FFFF`), including every language script, emoji, and symbol.
+
+https://raw.githubusercontent.com/inzerosight/inzerosight/main/docs/inzerosight-youtube-demo.mp4
