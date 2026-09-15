@@ -8,8 +8,16 @@
 
 ---
 
+## Demo
+
 <p align="center">
-  <img src="docs/inzerosight.gif" alt="inØsight demo">
+  <a href="https://www.youtube.com/watch?v=06yX9rLJBgs">
+    <img src="docs/inzerosight-girl.png" alt="Watch the inØsight demo on YouTube" width="900">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=06yX9rLJBgs"><strong>▶ Watch the full demo on YouTube</strong></a> · <a href="docs/inzerosight-youtube-demo.mp4">MP4</a>
 </p>
 
 <p align="center">
