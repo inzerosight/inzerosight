@@ -24,6 +24,7 @@ All operations performed by inØsight—including text encoding, decoding, encry
 inØsight requests permissions only to function as intended:
 
 - **Web Page Content (`<all_urls>`):** Used strictly to scan text nodes in the Document Object Model (DOM) for inØsight zero-width Unicode signatures so the local on-screen decode/decrypt button can be displayed. No page content, personal details, or browsing activity is tracked, logged, or recorded.
+- **Clipboard (`clipboardWrite`):** Used to copy encoded text when requested in the popup. Clipboard contents are processed locally and are not transmitted.
 
 ## 4. Third-Party Disclosures
 

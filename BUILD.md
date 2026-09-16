@@ -7,7 +7,7 @@
 ## Step-by-Step Build Instructions
 1. Install dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 
 2. Build the Firefox extension:

@@ -12,11 +12,12 @@ export default defineConfig(async ({ mode }) => {
                 manifest: () => {
                     const base = {
                         name: "in\u00D8sight",
-                        version: "3.1.0",
+                        version: "3.2.0",
                         author: "planetrenox@pm.me",
                         homepage_url: "https://github.com/inzerosight/inzerosight",
                         description: "Communicate undetected in plain sight.",
                         icons: { "48": "icon_500.png" },
+                        permissions: ["clipboardWrite"],
                     };
 
                     const content_scripts = [{

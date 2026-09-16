@@ -21,8 +21,8 @@ When enabled, prepends an invisible zero-width signature to the output. This all
 
 ## How ZWUS Works
 
-1. Takes each character's Unicode code point.
-2. Converts it to the chosen base (3, 6, or 8).
+1. Takes each character's Unicode code point. ZWUS-7 ranks printable ASCII first so common letters and spaces use short values.
+2. Converts the value to the chosen base (3, 6, or 7).
 3. Maps each resulting digit to its assigned zero-width character from the alphabet.
 4. Joins digits together; separates characters with the base's designated separator (also zero-width).
 

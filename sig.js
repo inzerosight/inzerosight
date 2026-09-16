@@ -5,7 +5,7 @@ export const SIG_PREFIX = '\u{200D}\u{200B}\u{00AD}';
 export const SIG = {
     3: '\u{200D}\u{200B}\u{00AD}\u{180E}\u{200D}',
     6: '\u{200D}\u{200B}\u{00AD}\u{200C}\u{200D}',
-    8: '\u{200D}\u{200B}\u{00AD}\u{200C}\u{200C}'
+    7: '\u{200D}\u{200B}\u{00AD}\u{200C}\u{200C}'
 };
 
 export const CIPHERS = {
@@ -28,16 +28,20 @@ export function makeSig(base, cipher) {
 }
 
 export function parseSig(text) {
-    if (!text.includes(SIG_PREFIX)) return null;
-    const base = Object.keys(SIG).find(b => text.includes(SIG[b]));
+    let sigIdx = text.indexOf(SIG_PREFIX), base;
+    while (sigIdx !== -1) {
+        base = Object.keys(SIG).find(b => text.startsWith(SIG[b], sigIdx));
+        if (base) break;
+        sigIdx = text.indexOf(SIG_PREFIX, sigIdx + SIG_PREFIX.length);
+    }
     if (!base) return null;
-    const sigIdx = text.indexOf(SIG[base]);
     const after = text.slice(sigIdx + SIG[base].length);
     const barrier = zwus[base].unifier + zwus[base][0];
     if (after.startsWith(barrier)) {
         const zwDigits = Array.from(after.slice(barrier.length, barrier.length + 3));
         const digits = zwDigits.map(z => Object.keys(zwus[base]).find(k => zwus[base][k] === z)).join('');
         const cipher = CIPHERS[parseInt(digits, base)];
+        if (!cipher) return { base, cipher: 'PLAIN', payload: after, sigIdx, sigLen: SIG[base].length };
         const payload = after.slice(barrier.length + 3);
         const sigLen = SIG[base].length + barrier.length + 3;
         return { base, cipher, payload, sigIdx, sigLen };
