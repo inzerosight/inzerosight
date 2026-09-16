@@ -1,4 +1,4 @@
-import zwus from 'zwus';
+import * as chunked from './chunked.js';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
 import { makeSig, parseSig } from './sig.js';
@@ -8,6 +8,9 @@ const encoderDropdown = document.getElementById('encoder');
 const cipherDropdown = document.getElementById('cipher');
 const signBtn = document.getElementById('sign');
 const sigDetect = document.getElementById('sigDetect');
+const notice = document.getElementById('notice');
+const buttons = ['encodeButton', 'decodeButton'].map(id => document.getElementById(id));
+const controls = [...buttons, encoderDropdown, cipherDropdown, signBtn];
 
 document.getElementById('encodeButton').addEventListener('click', ACT);
 document.getElementById('decodeButton').addEventListener('click', ACT);
@@ -15,9 +18,10 @@ signBtn.addEventListener('click', e =>
     e.target.classList.toggle('on')
 );
 
-let fadeTimer;
+let fadeTimer, busy = false;
 
-function ACT(event) {
+async function ACT(event) {
+    if (busy) return;
     clearTimeout(fadeTimer);
     sigDetect.className = '';
 
@@ -57,20 +61,47 @@ function ACT(event) {
 
     if (needsKey && !kStr) return;
 
+    busy = true;
+    controls.forEach(control => control.disabled = true);
+    notice.textContent = 'Processing…';
     try {
-        let val = DESCRY[op][cipher](text, base, kStr);
+        let val = await DESCRY[op][cipher](text, base, kStr);
         if (op === 'NO' && signBtn.classList.contains('on'))
             val = makeSig(base, cipher) + val;
         textarea.value = val;
+        if (op === 'NO') {
+            notice.textContent = 'Copying…';
+            const copied = await copyText(val);
+            if (copied && val.length <= 65536)
+                textarea.value = 'Copied to your clipboard.\n A copy has been placed between these brackets [' + val + ']';
+            notice.textContent = copied ? `Copied ${val.length.toLocaleString()} characters.` :
+                'Copy failed. The encoded text is in the box; select and copy it manually.';
+        } else notice.textContent = `Decoded ${val.length.toLocaleString()} characters.`;
     } catch (e) {
-        console.log(e);
+        console.error(e);
+        notice.textContent = `Could not ${op === 'NO' ? 'encode' : 'decode'}: ${e.message}`;
+    } finally {
+        busy = false;
+        controls.forEach(control => control.disabled = false);
     }
+}
 
-    if (op === 'NO') {
-        textarea.select();
-        document.execCommand('copy');
-        textarea.value = 'Copied to your clipboard.\n A copy has been placed between these brackets [' + textarea.value + ']';
+async function copyText(val) {
+    if (navigator.clipboard?.writeText) {
+        let timer;
+        try {
+            await Promise.race([
+                navigator.clipboard.writeText(val),
+                new Promise((_, reject) => timer = setTimeout(() => reject(new Error('Copy timed out')), 5000))
+            ]);
+            return true;
+        } catch (e) { console.warn('Clipboard copy failed', e); }
+        finally { clearTimeout(timer); }
     }
+    if (val.length > 65536) return false;
+    textarea.select();
+    try { return document.execCommand('copy'); }
+    catch (e) { console.warn('Clipboard copy failed', e); return false; }
 }
 
 function getCipherKey() {
@@ -80,18 +111,18 @@ function getCipherKey() {
 const DESCRY = {
     NO: {
         PLAIN: (ptStr, base) =>
-            zwus.encodeString(ptStr, base),
+            chunked.encodeString(ptStr, base),
         SPECK48_96CTR: (ptStr, base, kStr) =>
-            zwus.encodeNumberArray(speck48_96ctr.encrypt(ptStr, speck48_96ctr.getKey(kStr)), base),
+            chunked.encodeNumberArray(speck48_96ctr.encrypt(ptStr, speck48_96ctr.getKey(kStr)), base),
         'SPECK32_64ECB (insecure)': (ptStr, base, kStr) =>
-            zwus.encodeNumberArray(speck32_64ecb.encrypt(ptStr, speck32_64ecb.getKey(kStr)), base),
+            chunked.encodeNumberArray(speck32_64ecb.encrypt(ptStr, speck32_64ecb.getKey(kStr)), base),
     },
     YES: {
         PLAIN: (ptStr, base) =>
-            zwus.decodeToString(ptStr, base),
-        SPECK48_96CTR: (ptStr, base, kStr) =>
-            speck48_96ctr.decrypt(zwus.decodeToNumberArray(ptStr, base), speck48_96ctr.getKey(kStr)),
-        'SPECK32_64ECB (insecure)': (ptStr, base, kStr) =>
-            speck32_64ecb.decrypt(zwus.decodeToNumberArray(ptStr, base), speck32_64ecb.getKey(kStr)),
+            chunked.decodeToString(ptStr, base),
+        SPECK48_96CTR: async (ptStr, base, kStr) =>
+            speck48_96ctr.decrypt(await chunked.decodeToNumberArray(ptStr, base), speck48_96ctr.getKey(kStr)),
+        'SPECK32_64ECB (insecure)': async (ptStr, base, kStr) =>
+            speck32_64ecb.decrypt(await chunked.decodeToNumberArray(ptStr, base), speck32_64ecb.getKey(kStr)),
     }
 };
