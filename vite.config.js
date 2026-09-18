@@ -12,7 +12,7 @@ export default defineConfig(async ({ mode }) => {
                 manifest: () => {
                     const base = {
                         name: "in\u00D8sight",
-                        version: "3.3.0",
+                        version: "3.3.1",
                         author: "planetrenox@pm.me",
                         homepage_url: "https://github.com/inzerosight/inzerosight",
                         description: "Communicate undetected in plain sight.",
@@ -53,6 +53,7 @@ export default defineConfig(async ({ mode }) => {
                             gecko: {
                                 id: "{0a73f41c-c59c-404b-9e07-f7392fa830d4}",
                             },
+                            gecko_android: { strict_min_version: "120.0" },
                         },
                         content_scripts,
                     };
