@@ -9,3 +9,7 @@ The following environment variables are configured on the host system:
 
 ## Chrome Extension Details
 - **Extension ID:** `acnmohbphjmnbaboacmecidopeplkhog`
+
+## General Details
+- When publishing firefox, ensure you submit for firefox on mobile as well.
+- Before publishing, the version number needs to be incremented everywhere in the repo.
