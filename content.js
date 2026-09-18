@@ -199,41 +199,44 @@ function onAction(entry, parsed) {
     }
 }
 
-function getPayloadRange(node, base, start) {
-    let endNode = node;
-    let end = getPayloadEnd(node.nodeValue, base, start);
-
-    // Gmail inserts <wbr> elements into long zero-width runs, splitting one payload across text nodes.
-    while (end === endNode.nodeValue.length) {
-        let next = endNode.nextSibling;
-        let hasWbr = false;
-        while (next?.nodeType === Node.ELEMENT_NODE && next.tagName === 'WBR') {
-            hasWbr = true;
-            next = next.nextSibling;
-        }
-        if (!hasWbr || next?.nodeType !== Node.TEXT_NODE) break;
-        const nextEnd = getPayloadEnd(next.nodeValue, base, 0);
-        if (!nextEnd) break;
-        endNode = next;
-        end = nextEnd;
+function acrossWbr(node, side) {
+    let sibling = node[side], hasWbr = false;
+    while (sibling?.nodeType === Node.ELEMENT_NODE && sibling.tagName === 'WBR') {
+        hasWbr = true;
+        sibling = sibling[side];
     }
-    return { endNode, end };
+    return hasWbr && sibling?.nodeType === Node.TEXT_NODE ? sibling : null;
 }
 
 function scanNode(node) {
     if (!node || node.nodeType !== Node.TEXT_NODE) return;
-    const val = node.nodeValue;
+    for (let prev; (prev = acrossWbr(node, 'previousSibling'));) node = prev;
+    const nodes = [node];
+    let val = node.nodeValue;
+    for (let next; (next = acrossWbr(nodes.at(-1), 'nextSibling'));) {
+        nodes.push(next);
+        val += next.nodeValue;
+    }
     if (!val || !val.includes(SIG_PREFIX)) return;
+
+    const point = (offset, atEnd) => {
+        for (const current of nodes) {
+            if (offset < current.nodeValue.length || (atEnd && offset === current.nodeValue.length))
+                return { node: current, offset };
+            offset -= current.nodeValue.length;
+        }
+        return { node: nodes.at(-1), offset: nodes.at(-1).nodeValue.length };
+    };
 
     let idx = 0;
     while (idx < val.length) {
-        const sub = val.slice(idx);
-        const p = parseSig(sub);
+        const p = parseSig(val.slice(idx));
         if (!p) break;
         const start = idx + p.sigIdx;
-        const { endNode, end } = getPayloadRange(node, p.base, start + p.sigLen);
-        createOverlay(node, p, start, endNode, end);
-        idx = endNode === node ? end + 1 : val.length;
+        const end = getPayloadEnd(val, p.base, start + p.sigLen);
+        const from = point(start, false), to = point(end, true);
+        createOverlay(from.node, p, from.offset, to.node, to.offset);
+        idx = end + 1;
     }
 }
 
@@ -244,7 +247,7 @@ function scanTree(root) {
         acceptNode: n => (ign[n.parentElement?.tagName] ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
     });
     let n;
-    while ((n = walker.nextNode())) scanNode(n);
+    while ((n = walker.nextNode())) if (!acrossWbr(n, 'previousSibling')) scanNode(n);
 }
 
 scanTree(document.body);
@@ -260,7 +263,10 @@ function scheduleUpdate() {
 
 const obs = new MutationObserver(muts => {
     for (const e of [...active]) {
-        if (!e.node.isConnected || !e.node.nodeValue?.startsWith(SIG_PREFIX, e.start)) {
+        let prefix = e.node.nodeValue?.slice(e.start) || '';
+        for (let next = e.node; prefix.length < SIG_PREFIX.length &&
+            (next = acrossWbr(next, 'nextSibling'));) prefix += next.nodeValue;
+        if (!e.node.isConnected || !prefix.startsWith(SIG_PREFIX)) {
             e.wrap.remove();
             active.delete(e);
         }
@@ -269,7 +275,10 @@ const obs = new MutationObserver(muts => {
         if (m.type === 'characterData') scanNode(m.target);
         else for (const an of m.addedNodes) {
             if (an.nodeType === Node.TEXT_NODE) scanNode(an);
-            else if (an.nodeType === Node.ELEMENT_NODE && an.id !== 'in0-host') scanTree(an);
+            else if (an.nodeType === Node.ELEMENT_NODE && an.tagName === 'WBR') {
+                scanNode(an.previousSibling);
+                scanNode(an.nextSibling);
+            } else if (an.nodeType === Node.ELEMENT_NODE && an.id !== 'in0-host') scanTree(an);
         }
     }
     scheduleUpdate();

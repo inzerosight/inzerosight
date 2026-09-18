@@ -1,9 +1,10 @@
 {
   "name": "inzerosight",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "bun test sig.test.js content.test.js",
     "dev": "vite --mode chrome",
     "build:web": "vite build --mode web",
     "build:firefox": "vite build --mode firefox",
