@@ -3,7 +3,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/open-sans-v44-latin-regular.woff2') format('woff2');
+    src: url('assets/fonts/open-sans-v44-latin-regular.woff2') format('woff2');
 }
 
 html, body, div, span, applet, object, iframe,

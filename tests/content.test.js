@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import zwus from 'zwus';
-import { makeSig } from './sig.js';
+import { makeSig } from '../src/sig.js';
 
 test('page overlay detects headers split by WBR and decodes across the split', async () => {
     const buttons = [], inserted = [], fixtures = [], texts = [];
@@ -78,7 +78,7 @@ test('page overlay detects headers split by WBR and decodes across the split', a
     };
     globalThis.requestAnimationFrame = callback => { callback(); return 1; };
 
-    await import('./content.js');
+    await import('../src/content.js');
     assert.equal(buttons.length, fixtures.length);
     fixtures.forEach(({ cipher }, i) =>
         assert.equal(buttons[i].textContent, cipher === 'PLAIN' ? 'Decode' : 'Decrypt'));
