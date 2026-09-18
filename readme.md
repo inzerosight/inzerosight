@@ -21,12 +21,12 @@ When enabled, prepends an invisible zero-width signature to the output. This all
 
 ## How ZWUS Works
 
-1. Takes each character's Unicode code point. ZWUS-7 ranks printable ASCII first so common letters and spaces use short values.
-2. Converts the value to the chosen base (3, 6, or 7).
-3. Maps each resulting digit to its assigned zero-width character from the alphabet.
-4. Joins digits together; separates characters with the base's designated separator (also zero-width).
+ZWUS (Zero Width Unicode Standard) hides messages in plain sight by converting text into completely invisible Unicode characters:
 
-The result is a string of invisible Unicode that carries the full original text. Decoding reverses the mapping: splits on the separator, looks up each zero-width character to recover the digit, parses the base-N number back to a code point, and reconstructs the string.
+1. **Convert:** Translates each character (or encrypted data) into numeric values.
+2. **Encode:** Maps those numbers into a custom alphabet of zero-width, invisible characters separated by an invisible delimiter.
+
+The resulting text looks completely empty or hidden between ordinary letters. Decoding simply reads the invisible characters and reconstructs the original text.
 
 For details regarding picking the optimal standard/base, see [docs/zwus.md](docs/zwus.md).
 
