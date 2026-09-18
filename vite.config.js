@@ -65,15 +65,16 @@ export default defineConfig(async ({ mode }) => {
     plugins.push({
         name: 'copy-icon',
         writeBundle() {
-            if (fs.existsSync('icon_500.png')) {
-                fs.copyFileSync('icon_500.png', `dist/${target}/icon_500.png`);
+            if (fs.existsSync('src/assets/icon_500.png')) {
+                fs.copyFileSync('src/assets/icon_500.png', `dist/${target}/icon_500.png`);
             }
         }
     });
 
     return {
+        root: 'src',
         build: {
-            outDir: `dist/${target}`,
+            outDir: `../dist/${target}`,
             emptyOutDir: true,
         },
         plugins,

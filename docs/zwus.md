@@ -35,7 +35,7 @@ Detection requires an exact match to one of the nine registered signatures (thre
 
 For compatibility, inØsight still reads the old five-character PLAIN headers and ten-character encrypted headers for ZWUS-3, ZWUS-6, and ZWUS-7. New encoding always writes the 11-character format. Complete modern signatures take priority within an uninterrupted zero-width run. Legacy messages separated from modern messages by visible text remain independently detectable.
 
-Legacy recognition is isolated in `LEGACY_SIGNATURES` and `parseLegacySig` in `sig.js`, with explicitly labeled legacy tests. To retire it, remove that registry, reader, legacy tests, and the `legacyPlain` condition in `findSig`, then make `parseSig` use only `parseModernSig`. Future standards must not be added to the legacy registry.
+Legacy recognition is isolated in `LEGACY_SIGNATURES` and `parseLegacySig` in `src/sig.js`, with explicitly labeled legacy tests. To retire it, remove that registry, reader, legacy tests, and the `legacyPlain` condition in `findSig`, then make `parseSig` use only `parseModernSig`. Future standards must not be added to the legacy registry.
 
 Incomplete or unknown extended headers do not fall back to legacy PLAIN. Exact legacy encrypted headers remain recognized, with everything after their tenth character treated as payload.
 

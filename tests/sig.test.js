@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import zwus from 'zwus';
-import * as chunked from './chunked.js';
-import * as ctr from './speck48_96ctr.js';
-import * as ecb from './speck32_64ecb.js';
-import { makeSig, parseSig, parseModernSig, parseLegacySig, getPayloadEnd } from './sig.js';
+import * as chunked from '../src/chunked.js';
+import * as ctr from '../src/speck48_96ctr.js';
+import * as ecb from '../src/speck32_64ecb.js';
+import { makeSig, parseSig, parseModernSig, parseLegacySig, getPayloadEnd } from '../src/sig.js';
 
 // Frozen wire-format fixtures, independent of the signature registry.
 const HEADERS = {
