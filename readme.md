@@ -41,3 +41,7 @@ The encoder/decoder is available as a standalone package for multiple languages:
 
 > [!NOTE]
 > Encoding works with **all Unicode characters in existence** (`U+0000` to `U+10FFFF`), including every language script, emoji, and symbol.
+
+## Community
+
+Join our subreddit at [r/InZeroSight](https://www.reddit.com/r/InZeroSight/)! You can test and use inØsight there, discuss features and feedback, or explore adjacent topics in steganography and privacy.
