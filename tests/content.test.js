@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import zwus from 'zwus';
 import { makeSig } from '../src/sig.js';
+import { password, plaintext, payload as chachaPayload } from './fixtures/chacha20.js';
 
 test('page overlay detects headers split by WBR and decodes across the split', async () => {
     const buttons = [], inserted = [], fixtures = [], texts = [];
@@ -31,9 +32,9 @@ test('page overlay detects headers split by WBR and decodes across the split', a
     };
 
     for (const base of [3, 6, 7]) for (const cipher of
-        ['PLAIN', 'SPECK48_96CTR', 'SPECK32_64ECB (insecure)']) {
+        ['PLAIN', 'SPECK48_96CTR', 'SPECK32_64ECB (insecure)', 'CHACHA20']) {
         const payload = cipher === 'PLAIN' ? zwus.encodeString('hello', base) :
-            zwus.encodeNumberArray([1, 2, 3], base);
+            zwus.encodeNumberArray(cipher === 'CHACHA20' ? chachaPayload : [1, 2, 3], base);
         for (const cut of [1, 2, 3, 5, 6, 10]) addRun(makeSig(base, cipher) + payload, cut, cipher);
     }
 
@@ -84,6 +85,24 @@ test('page overlay detects headers split by WBR and decodes across the split', a
         assert.equal(buttons[i].textContent, cipher === 'PLAIN' ? 'Decode' : 'Decrypt'));
     observer.callback([{ type: 'childList', addedNodes: [] }]);
     assert.equal(buttons.some(button => button.parentElement.removed), false);
-    buttons[0].onclick();
+    await buttons[0].onclick();
     assert.equal(inserted[0].textContent, ' hello ');
+
+    let prompts = 0;
+    globalThis.prompt = () => { prompts++; return password; };
+    const indices = fixtures.flatMap(({ cipher }, i) => cipher === 'CHACHA20' ? [i] : []);
+    for (const index of [indices[0], indices[6], indices[12]]) {
+        const button = buttons[index], pending = button.onclick();
+        assert.equal(button.disabled, true);
+        await button.onclick(); // A second click must not start another derivation.
+        await pending;
+        assert.equal(button.disabled, false);
+        assert.equal(inserted.at(-1).textContent, ` ${plaintext} `);
+    }
+    assert.equal(prompts, 3);
+
+    const index = indices[1], pending = buttons[index].onclick(), count = inserted.length;
+    fixtures[index].nodes[0].nodeValue = 'changed while deriving';
+    await pending;
+    assert.equal(inserted.length, count);
 });

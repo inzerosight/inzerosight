@@ -1,6 +1,7 @@
 import zwus from 'zwus';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
+import * as chacha20 from './chacha20.js';
 import { SIG_PREFIX, parseSig, getPayloadEnd } from './sig.js';
 
 let host, shadow;
@@ -94,7 +95,12 @@ function createOverlay(node, parsed, start, endNode, end) {
     const entry = { wrap, node, start, endNode, end };
     active.add(entry);
 
-    btn.onclick = () => onAction(entry, parsed);
+    btn.onclick = async () => {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try { await onAction(entry, parsed); }
+        finally { btn.disabled = false; }
+    };
     updatePos(entry);
 }
 
@@ -154,12 +160,12 @@ function updatePos(entry) {
     wrap.style.top = `${y - wrap.offsetHeight - 2}px`;
 }
 
-function onAction(entry, parsed) {
+async function onAction(entry, parsed) {
     const { wrap, node, start, endNode, end } = entry;
     const r = document.createRange();
     r.setStart(node, start);
     r.setEnd(endNode, end);
-    const rawPayload = r.toString().slice(parsed.sigLen);
+    const raw = r.toString(), rawPayload = raw.slice(parsed.sigLen);
     let decoded = '';
 
     if (parsed.cipher === 'PLAIN') {
@@ -177,6 +183,8 @@ function onAction(entry, parsed) {
                 decoded = speck48_96ctr.decrypt(arr, speck48_96ctr.getKey(pass));
             else if (parsed.cipher === 'SPECK32_64ECB (insecure)')
                 decoded = speck32_64ecb.decrypt(arr, speck32_64ecb.getKey(pass));
+            else if (parsed.cipher === 'CHACHA20')
+                decoded = await chacha20.decrypt(arr, pass);
         } catch (e) {
             console.error(e);
         }
@@ -187,6 +195,7 @@ function onAction(entry, parsed) {
     }
 
     if (decoded) {
+        if (!node.isConnected || !endNode.isConnected || r.toString() !== raw) return;
         r.deleteContents();
         const span = document.createElement('span');
         span.className = 'inzerosight-decoded';

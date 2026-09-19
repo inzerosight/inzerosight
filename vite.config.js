@@ -30,6 +30,9 @@ export default defineConfig(async ({ mode }) => {
                         return {
                             ...base,
                             manifest_version: 3,
+                            content_security_policy: {
+                                extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
+                            },
                             action: {
                                 default_icon: { "48": "icon_500.png" },
                                 default_title: "in\u00D8sight",
@@ -48,7 +51,7 @@ export default defineConfig(async ({ mode }) => {
                             default_title: "in\u00D8sight",
                             default_popup: "index.html",
                         },
-                        content_security_policy: "script-src 'self'; style-src 'self';",
+                        content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; style-src 'self';",
                         browser_specific_settings: {
                             gecko: {
                                 id: "{0a73f41c-c59c-404b-9e07-f7392fa830d4}",

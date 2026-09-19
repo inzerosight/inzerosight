@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bun test tests/sig.test.js tests/content.test.js",
+    "test": "bun test tests/sig.test.js tests/content.test.js tests/chacha20.test.js",
     "dev": "vite --mode chrome",
     "build:web": "vite build --mode web",
     "build:firefox": "vite build --mode firefox",
@@ -12,8 +12,10 @@
     "build": "bun run build:firefox && bun run build:chrome"
   },
   "dependencies": {
+    "@noble/ciphers": "2.4.0",
     "blakejs": "1.2.1",
     "generic-speck": "1.1.1",
+    "hash-wasm": "4.12.0",
     "zwus": "3.0.0"
   },
   "devDependencies": {
