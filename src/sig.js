@@ -36,6 +36,10 @@ export function makeSig(base, cipher) {
     return entry.sig;
 }
 
+export const getSigHint = (parsed, base, cipher) =>
+    parsed.base === base && parsed.cipher === cipher ? '' :
+        `ZWUS-${parsed.base} (${parsed.cipher}) signature detected`;
+
 function findSig(text, signatures) {
     let sigIdx = text.indexOf(SIG_PREFIX);
     while (sigIdx !== -1) {

@@ -2,7 +2,7 @@ import * as chunked from './chunked.js';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
 import * as chacha20 from './chacha20.js';
-import { makeSig, parseSig } from './sig.js';
+import { getSigHint, makeSig, parseSig } from './sig.js';
 
 const textarea = document.getElementById('textarea');
 const encoderDropdown = document.getElementById('encoder');
@@ -19,11 +19,12 @@ signBtn.addEventListener('click', e =>
     e.target.classList.toggle('on')
 );
 
-let fadeTimer, busy = false;
+let fadeTimer, fadeFrame, busy = false;
 
 async function ACT(event) {
     if (busy) return;
     clearTimeout(fadeTimer);
+    cancelAnimationFrame(fadeFrame);
     sigDetect.className = '';
 
     if (textarea.value === '') {
@@ -35,18 +36,12 @@ async function ACT(event) {
     let cipher = getCipherKey();
     let base = encoderDropdown.value.split('-')[1];
     let text = textarea.value;
+    let hint = '';
 
     if (op === 'YES') {
         const parsed = parseSig(text);
         if (parsed) {
-            if (parsed.base !== base || (parsed.cipher && parsed.cipher !== cipher)) {
-                const desc = parsed.cipher && parsed.cipher !== 'PLAIN' ? ` (${parsed.cipher})` : '';
-                sigDetect.textContent = `ZWUS-${parsed.base}${desc} signature detected`;
-                sigDetect.className = 'show';
-                fadeTimer = setTimeout(() =>
-                    sigDetect.className = '', 2000
-                );
-            }
+            hint = getSigHint(parsed, base, cipher);
             base = parsed.base;
             encoderDropdown.value = 'ZWUS-' + base;
             if (parsed.cipher) {
@@ -60,6 +55,12 @@ async function ACT(event) {
     const needsKey = cipher !== 'PLAIN';
     const kStr = needsKey && prompt('enter password.');
 
+    if (hint) {
+        sigDetect.textContent = hint;
+        sigDetect.className = 'show';
+        fadeFrame = requestAnimationFrame(() =>
+            fadeTimer = setTimeout(() => sigDetect.className = '', 2000));
+    }
     if (needsKey && !kStr) return;
 
     busy = true;
