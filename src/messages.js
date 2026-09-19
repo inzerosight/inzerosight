@@ -1,0 +1,1 @@
+export const CHACHA20_DECRYPT = 'CHACHA20_DECRYPT';

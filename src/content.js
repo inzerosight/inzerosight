@@ -1,11 +1,18 @@
 import zwus from 'zwus';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
-import * as chacha20 from './chacha20.js';
+import { CHACHA20_DECRYPT } from './messages.js';
 import { SIG_PREFIX, parseSig, getPayloadEnd } from './sig.js';
 
 let host, shadow;
 const active = new Set();
+
+async function decryptChacha20(numbers, password) {
+    const runtime = globalThis.browser?.runtime || globalThis.chrome?.runtime;
+    const response = await runtime.sendMessage({ type: CHACHA20_DECRYPT, numbers, password });
+    if (!response?.ok) throw new Error(response?.error || 'ChaCha20 decryption failed');
+    return response.value;
+}
 
 function initShadow() {
     if (host) return;
@@ -184,7 +191,7 @@ async function onAction(entry, parsed) {
             else if (parsed.cipher === 'SPECK32_64ECB (insecure)')
                 decoded = speck32_64ecb.decrypt(arr, speck32_64ecb.getKey(pass));
             else if (parsed.cipher === 'CHACHA20')
-                decoded = await chacha20.decrypt(arr, pass);
+                decoded = await decryptChacha20(arr, pass);
         } catch (e) {
             console.error(e);
         }

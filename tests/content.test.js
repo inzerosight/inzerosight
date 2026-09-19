@@ -88,8 +88,15 @@ test('page overlay detects headers split by WBR and decodes across the split', a
     await buttons[0].onclick();
     assert.equal(inserted[0].textContent, ' hello ');
 
-    let prompts = 0;
+    let prompts = 0, messages = 0;
     globalThis.prompt = () => { prompts++; return password; };
+    globalThis.chrome = { runtime: { sendMessage: async message => {
+        messages++;
+        assert.equal(message.type, 'CHACHA20_DECRYPT');
+        assert.deepEqual(message.numbers, chachaPayload);
+        assert.equal(message.password, password);
+        return { ok: true, value: plaintext };
+    } } };
     const indices = fixtures.flatMap(({ cipher }, i) => cipher === 'CHACHA20' ? [i] : []);
     for (const index of [indices[0], indices[6], indices[12]]) {
         const button = buttons[index], pending = button.onclick();
@@ -100,6 +107,7 @@ test('page overlay detects headers split by WBR and decodes across the split', a
         assert.equal(inserted.at(-1).textContent, ` ${plaintext} `);
     }
     assert.equal(prompts, 3);
+    assert.equal(messages, 3);
 
     const index = indices[1], pending = buttons[index].onclick(), count = inserted.length;
     fixtures[index].nodes[0].nodeValue = 'changed while deriving';

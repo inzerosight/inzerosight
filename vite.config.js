@@ -12,7 +12,7 @@ export default defineConfig(async ({ mode }) => {
                 manifest: () => {
                     const base = {
                         name: "in\u00D8sight",
-                        version: "3.4.0",
+                        version: "3.4.1",
                         author: "planetrenox@pm.me",
                         homepage_url: "https://github.com/inzerosight/inzerosight",
                         description: "Communicate undetected in plain sight.",
@@ -25,6 +25,8 @@ export default defineConfig(async ({ mode }) => {
                         js: ["content.js"],
                         run_at: "document_idle"
                     }];
+                    const background = target === 'chrome' ?
+                        { service_worker: "background.js" } : { scripts: ["background.js"] };
 
                     if (target === 'chrome') {
                         return {
@@ -33,6 +35,7 @@ export default defineConfig(async ({ mode }) => {
                             content_security_policy: {
                                 extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
                             },
+                            background,
                             action: {
                                 default_icon: { "48": "icon_500.png" },
                                 default_title: "in\u00D8sight",
@@ -52,6 +55,7 @@ export default defineConfig(async ({ mode }) => {
                             default_popup: "index.html",
                         },
                         content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; style-src 'self';",
+                        background,
                         browser_specific_settings: {
                             gecko: {
                                 id: "{0a73f41c-c59c-404b-9e07-f7392fa830d4}",
