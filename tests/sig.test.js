@@ -5,7 +5,7 @@ import * as chunked from '../src/chunked.js';
 import * as ctr from '../src/speck48_96ctr.js';
 import * as ecb from '../src/speck32_64ecb.js';
 import * as chacha from '../src/chacha20.js';
-import { makeSig, parseSig, parseModernSig, parseLegacySig, getPayloadEnd } from '../src/sig.js';
+import { getSigHint, makeSig, parseSig, parseModernSig, parseLegacySig, getPayloadEnd } from '../src/sig.js';
 
 // Frozen wire-format fixtures, independent of the signature registry.
 const HEADERS = {
@@ -125,6 +125,14 @@ test('unknown standards and modes cannot generate signatures', () => {
     assert.throws(() => makeSig(8, 'PLAIN'), RangeError);
     assert.throws(() => makeSig(7, 'unknown'), RangeError);
     assert.throws(() => makeSig(7), RangeError);
+});
+
+test('signature hint identifies both settings when either selection is wrong', () => {
+    const parsed = { base: '7', cipher: 'PLAIN' };
+    assert.equal(getSigHint(parsed, '7', 'PLAIN'), '');
+    assert.equal(getSigHint(parsed, '6', 'PLAIN'), 'ZWUS-7 (PLAIN) signature detected');
+    assert.equal(getSigHint(parsed, '7', 'CHACHA20'), 'ZWUS-7 (PLAIN) signature detected');
+    assert.equal(getSigHint(parsed, '6', 'CHACHA20'), 'ZWUS-7 (PLAIN) signature detected');
 });
 
 test('legacy cross-standard collision does not match a modern signature', () => {

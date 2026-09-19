@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bun test tests/sig.test.js tests/content.test.js tests/chacha20.test.js",
+    "test": "bun test tests/sig.test.js tests/dash.test.js tests/content.test.js tests/chacha20.test.js",
     "dev": "vite --mode chrome",
     "build:web": "vite build --mode web",
     "build:firefox": "vite build --mode firefox",
