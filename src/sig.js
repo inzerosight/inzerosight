@@ -11,7 +11,8 @@ export const SIG = {
 export const CIPHERS = {
     0: 'PLAIN',
     1: 'SPECK48_96CTR',
-    2: 'SPECK32_64ECB (insecure)'
+    2: 'SPECK32_64ECB (insecure)',
+    3: 'CHACHA20'
 };
 
 export const CIPHER_TO_ID = Object.fromEntries(

@@ -1,6 +1,7 @@
 import * as chunked from './chunked.js';
 import * as speck48_96ctr from './speck48_96ctr.js';
 import * as speck32_64ecb from './speck32_64ecb.js';
+import * as chacha20 from './chacha20.js';
 import { makeSig, parseSig } from './sig.js';
 
 const textarea = document.getElementById('textarea');
@@ -116,6 +117,8 @@ const DESCRY = {
             chunked.encodeNumberArray(speck48_96ctr.encrypt(ptStr, speck48_96ctr.getKey(kStr)), base),
         'SPECK32_64ECB (insecure)': (ptStr, base, kStr) =>
             chunked.encodeNumberArray(speck32_64ecb.encrypt(ptStr, speck32_64ecb.getKey(kStr)), base),
+        CHACHA20: async (ptStr, base, kStr) =>
+            chunked.encodeNumberArray(await chacha20.encrypt(ptStr, kStr), base),
     },
     YES: {
         PLAIN: (ptStr, base) =>
@@ -124,5 +127,7 @@ const DESCRY = {
             speck48_96ctr.decrypt(await chunked.decodeToNumberArray(ptStr, base), speck48_96ctr.getKey(kStr)),
         'SPECK32_64ECB (insecure)': async (ptStr, base, kStr) =>
             speck32_64ecb.decrypt(await chunked.decodeToNumberArray(ptStr, base), speck32_64ecb.getKey(kStr)),
+        CHACHA20: (ptStr, base, kStr) =>
+            chacha20.decrypt(chunked.decodeToNumberArray(ptStr, base), kStr),
     }
 };

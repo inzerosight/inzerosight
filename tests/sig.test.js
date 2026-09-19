@@ -4,6 +4,7 @@ import zwus from 'zwus';
 import * as chunked from '../src/chunked.js';
 import * as ctr from '../src/speck48_96ctr.js';
 import * as ecb from '../src/speck32_64ecb.js';
+import * as chacha from '../src/chacha20.js';
 import { makeSig, parseSig, parseModernSig, parseLegacySig, getPayloadEnd } from '../src/sig.js';
 
 // Frozen wire-format fixtures, independent of the signature registry.
@@ -12,7 +13,7 @@ const HEADERS = {
     6: '\u200D\u200B\u00AD\u200C\u200D',
     7: '\u200D\u200B\u00AD\u200C\u200C'
 };
-const MODES = ['PLAIN', 'SPECK48_96CTR', 'SPECK32_64ECB (insecure)'];
+const MODES = ['PLAIN', 'SPECK48_96CTR', 'SPECK32_64ECB (insecure)', 'CHACHA20'];
 const MESSAGE = 'tt\0 Hello, 世界 🌍\n';
 const key = 'signature regression';
 
@@ -21,13 +22,14 @@ for (const base of [3, 6, 7]) {
     const extended = digits => header + z.unifier + z[0] +
         Array.from(digits, d => z[d]).join('');
 
-    test(`ZWUS-${base}: exact 11-character headers and round trips for every mode`, () => {
+    test(`ZWUS-${base}: exact 11-character headers and round trips for every mode`, async () => {
         for (const [id, cipher] of MODES.entries()) {
-            const expected = extended('000' + id);
+            const expected = extended(id === 3 && base === 3 ? '0010' : '000' + id);
             assert.equal(makeSig(base, cipher), expected);
             assert.equal(makeSig(String(base), cipher).length, 11);
-            const engine = [null, ctr, ecb][id];
-            const payload = engine ? chunked.encodeNumberArray(engine.encrypt(MESSAGE, engine.getKey(key)), base) :
+            const engine = [null, ctr, ecb, chacha][id];
+            const secret = id === 3 ? key : engine?.getKey(key);
+            const payload = engine ? chunked.encodeNumberArray(await engine.encrypt(MESSAGE, secret), base) :
                 chunked.encodeString(MESSAGE, base);
             const parsed = parseSig('visible ' + expected + payload + ' suffix');
             assert.deepEqual(parsed, {
@@ -37,14 +39,14 @@ for (const base of [3, 6, 7]) {
             const source = 'visible ' + expected + payload + ' suffix';
             const end = getPayloadEnd(source, base, start);
             assert.equal(source.slice(start, end), payload);
-            const decoded = engine ? engine.decrypt(chunked.decodeToNumberArray(parsed.payload, base), engine.getKey(key)) :
+            const decoded = engine ? await engine.decrypt(chunked.decodeToNumberArray(parsed.payload, base), secret) :
                 chunked.decodeToString(parsed.payload, base);
             assert.equal(decoded, MESSAGE);
         }
     });
 
     test(`ZWUS-${base}: modern reader rejects every unregistered four-digit ID`, () => {
-        for (let id = 3; id < base ** 4; id++)
+        for (let id = 4; id < base ** 4; id++)
             assert.equal(parseModernSig(extended(id.toString(base).padStart(4, '0'))), null, `ID ${id}`);
     });
 
