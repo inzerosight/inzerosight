@@ -150,6 +150,29 @@ select {
     border-color: #fff;
 }
 
+#controls {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 1.5%;
+    margin: 0 1.5%;
+}
+
+#controls > * {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+#controls select {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+}
+
+#sign {
+    flex: none;
+}
+
 #notice {
     font-size: 10px;
     margin-top: 1.5%;
