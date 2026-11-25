@@ -14,8 +14,8 @@
   "dependencies": {
     "@noble/ciphers": "2.4.0",
     "blakejs": "1.2.1",
-    "generic-speck": "1.1.1",
-    "hash-wasm": "4.12.0",
+    "generic-speck": "1.2.0",
+    "hash-wasm": "4.13.0",
     "zwus": "3.0.0"
   },
   "devDependencies": {
