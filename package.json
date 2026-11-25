@@ -19,7 +19,7 @@
     "zwus": "3.0.0"
   },
   "devDependencies": {
-    "vite": "^6.3.5",
-    "vite-plugin-web-extension": "^4.5.0"
+    "vite": "6.4.3",
+    "vite-plugin-web-extension": "4.5.1"
   }
 }
